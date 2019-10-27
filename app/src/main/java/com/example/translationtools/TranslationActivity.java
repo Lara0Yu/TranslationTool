@@ -11,4 +11,10 @@ public class TranslationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_translation);
     }
+
+    private void viewList() {
+
+    }
+
+    private void next() {}
 }

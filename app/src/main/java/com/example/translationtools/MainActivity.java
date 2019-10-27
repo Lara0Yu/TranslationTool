@@ -1,7 +1,11 @@
 package com.example.translationtools;
 
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -15,14 +19,23 @@ import android.text.InputType;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private ListView startList;
+    private DBHelper db;
+    private TextView test;
+    private List dataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        db =  new DBHelper(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -57,9 +71,22 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog,int which) {
                                 // Write your code here to execute after dialog
                                 Toast.makeText(getApplicationContext(),"Проект создан", Toast.LENGTH_SHORT).show();
+
+                                SQLiteDatabase sqDb = db.getWritableDatabase();
+                                ContentValues cv = new ContentValues();
+                                cv.put("name", input.getText().toString());
+
+                                sqDb.insert("Projects", null, cv);
+
+                                sqDb.close();
+
+
+
+
                                 //Create new window
                                 Intent intent =  new Intent(MainActivity.this, TranslationActivity.class);
                                 startActivity(intent);
+
 
                             }
                         });
@@ -77,6 +104,43 @@ public class MainActivity extends AppCompatActivity {
         });
 
         startList = (ListView) findViewById(R.id.listOfProject);
+        dataList = new ArrayList<String>();
+        setDataListView();
+
+
+    }
+
+
+    /**
+     *  Заполнение Списка уже созданных проектов из базы данных
+     */
+    public void setDataListView() {
+        ContentValues cv = new ContentValues();
+        SQLiteDatabase sqlDb = db.getWritableDatabase();
+
+        Cursor c =
+                sqlDb.query("Projects", null, null,
+                        null, null, null, null);
+
+        if (c.moveToFirst()) {
+
+            // определяем номера столбцов по имени в выборке
+            int nameColIndex = c.getColumnIndex("name");
+
+            do {
+                dataList.add(c.getString(nameColIndex));
+            } while (c.moveToNext());
+        } else {
+            return;
+        }
+
+        //Создаем адаптер (переходник между списком и листвью)
+        ListAdapter la = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList);
+
+        //Назначаем адаптер листвью
+        startList.setAdapter(la);
+
+        c.close();
     }
 
     @Override

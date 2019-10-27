@@ -10,6 +10,10 @@
 
     <ListView
         android:id="@+id/listOfProject"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="409dp"
+        android:layout_height="667dp"
+        tools:layout_editor_absoluteX="3dp"
+        tools:layout_editor_absoluteY="8dp">
+
+    </ListView>
 </androidx.constraintlayout.widget.ConstraintLayout>
