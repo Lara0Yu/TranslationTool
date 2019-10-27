@@ -19,6 +19,7 @@ import android.text.InputType;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,10 +31,10 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ListView startList;
-    private DBHelper db;
+    private static DBHelper db;
     private TextView test;
     private List dataList;
 
@@ -46,68 +47,68 @@ public class MainActivity extends AppCompatActivity {
         db =  new DBHelper(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                // Creating alert Dialog with one Button
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-
-                //AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-
-                // Setting Dialog Title
-                alertDialog.setTitle("Новый проект");
-
-                // Setting Dialog Message
-                alertDialog.setMessage("Введите название проекта");
-                final EditText input = new EditText(MainActivity.this);
-                alertDialog.setView(input);
-
-
-
-                // Setting Positive "Yes" Button
-                alertDialog.setPositiveButton("Создать",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int which) {
-                                // Write your code here to execute after dialog
-                                Toast.makeText(getApplicationContext(),"Проект создан", Toast.LENGTH_SHORT).show();
-
-                                SQLiteDatabase sqDb = db.getWritableDatabase();
-                                ContentValues cv = new ContentValues();
-                                cv.put("name", input.getText().toString());
-
-                                sqDb.insert("Projects", null, cv);
-
-                                sqDb.close();
-
-
-
-
-                                //Create new window
-                                Intent intent =  new Intent(MainActivity.this, TranslationActivity.class);
-                                startActivity(intent);
-
-
-                            }
-                        });
-                // Setting Negative "Cancel" Button
-                alertDialog.setNegativeButton("Отмена",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Write your code here to execute after dialog
-                                dialog.cancel();
-                            }
-                        });
-
-                alertDialog.show();
-            }
-        });
+        fab.setOnClickListener(this);
 
         startList = (ListView) findViewById(R.id.listOfProject);
         dataList = new ArrayList<String>();
         setDataListView();
 
+        startList.setOnItemClickListener((parent, view, position, id) -> {
+            Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
+            Intent newWindow = new Intent(MainActivity.this, TranslationActivity.class);
+            startActivity(newWindow);
 
+        });
+
+
+    }
+
+
+    public void showAlert() {
+
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+        alertDialog.setTitle("Новый проект");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("Введите название проекта");
+        final EditText input = new EditText(MainActivity.this);
+        alertDialog.setView(input);
+
+        // Setting Positive "Yes" Button
+        alertDialog.setPositiveButton("Создать",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int which) {
+                        // Write your code here to execute after dialog
+                        Toast.makeText(getApplicationContext(),"Проект создан", Toast.LENGTH_SHORT).show();
+
+                        SQLiteDatabase sqDb = db.getWritableDatabase();
+                        ContentValues cv = new ContentValues();
+                        cv.put("name", input.getText().toString());
+
+                        sqDb.insert("Projects", null, cv);
+
+                        sqDb.close();
+
+
+
+
+
+                        //Create new window
+                        Intent intent =  new Intent(MainActivity.this, TranslationActivity.class);
+                        startActivity(intent);
+
+
+                    }
+                });
+        // Setting Negative "Cancel" Button
+        alertDialog.setNegativeButton("Отмена",
+                (dialog, which) -> {
+                    // Write your code here to execute after dialog
+                    dialog.cancel();
+                });
+
+        alertDialog.show();
     }
 
 
@@ -163,5 +164,29 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View view) {
+
+        switch (view.getId()) {
+            case R.id.fab:
+                showAlert();
+
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                // Filter to only show results that can be "opened", such as a
+                // file (as opposed to a list of contacts or timezones)
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+                // Filter to show only images, using the image MIME data type.
+                // If one wanted to search for ogg vorbis files, the type would be "audio/ogg".
+                // To search for all documents available via installed storage providers,
+                // it would be "*/*".
+                intent.setType("image/*");
+
+                startActivityForResult(intent, 42);
+                break;
+        }
+
     }
 }
