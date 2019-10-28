@@ -52,7 +52,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
     public void setData(String tableName) {
         SQLiteDatabase sqlDb = db.getWritableDatabase();
-        String[] tableColumns = new String[] {"original_text"};
+        String[] tableColumns = new String[] {"original_text", "id", "status", "translate_text"};
         String whereClause = "status = ?";
         String[] whereArgs = new String[] {
                 "0"
@@ -80,6 +80,13 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         if (cursor.moveToNext())
         {
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+            if (!cursor.isNull(cursor.getColumnIndex("translate_text")))
+            {
+                outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
+            } else
+            {
+                outputField.setText("");
+            }
         } else {
             /**
              * do smthg
@@ -90,13 +97,59 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     public void prev() {
 
         if (cursor.moveToPrevious()) {
+//            String currentId = cursor.getString(cursor.getColumnIndex("id"));
+//
+//            SQLiteDatabase sqlDb = db.getWritableDatabase();
+////            ContentValues cv = new ContentValues();
+//
+//            String[] tableColumns = new String[] {"original_text", "id", "status", "translate_text"};
+//            String whereClause = "id = ?";
+//            String[] whereArgs = new String[] {
+//                     currentId
+//            };
+//
+//            Cursor prevCursor =
+//                    sqlDb.query(TABLE_NAME,  tableColumns, whereClause,
+//                            whereArgs, null, null, null);
+
+
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
-            o
+            if (!cursor.isNull(cursor.getColumnIndex("translate_text")))
+            {
+                outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
+//                outputField.setText(prevCursor.getString(prevCursor.getColumnIndex("translate_text")));
+            } else
+            {
+                outputField.setText("");
+            }
+
+            sqlDb.close();
         }
 
     }
 
-    public void save() {
+    public void save(boolean update) {
+        String currentId = cursor.getString(cursor.getColumnIndex("id"));
+        int currentStatus = cursor.getInt(cursor.getColumnIndex("status"));
+
+        SQLiteDatabase sqlDb = db.getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+
+        if (!outputField.getText().toString().isEmpty())
+        {
+        cv.put("translate_text", outputField.getText().toString());
+
+        if (update)
+        {
+            cv.put("status", "1");
+        }
+            if ((currentStatus == 0 && !update) || update) {
+                int updCount = sqlDb.update(TABLE_NAME, cv, "id = ?",
+                        new String[]{currentId});
+            }
+        }
+        sqlDb.close();
 
     }
 
@@ -107,14 +160,16 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         switch (view.getId()) {
             case R.id.save:
+//                save(true);
                 Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.prev:
+                prev();
                 Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.next:
+                save(false);
                 next();
-
                 Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
 
