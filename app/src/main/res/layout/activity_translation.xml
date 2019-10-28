@@ -61,7 +61,7 @@
 
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/inputField"
                 android:padding="20dp"
                 android:fontFamily="helvetica"
                 android:textSize="20sp"
@@ -70,7 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textIsSelectable="false"
-                android:text="@string/original" />
+                android:text="Call me Ismahel." />
 
         </androidx.cardview.widget.CardView>
 
@@ -90,7 +90,7 @@
                 android:maxLines="10"
                 android:padding="20dp"
                 android:scrollHorizontally="false"
-                android:text="@string/translated" />
+                android:text="" />
         </androidx.cardview.widget.CardView>
 
 
