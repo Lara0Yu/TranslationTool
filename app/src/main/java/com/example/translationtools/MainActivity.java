@@ -1,24 +1,31 @@
 package com.example.translationtools;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -33,11 +40,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -48,12 +62,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List dataList;
     private ListAdapter la;
 
+    private final static int PERMISSION_REQUEST_CODE =1000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+        }
         db =  new DBHelper(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -65,12 +86,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         startList.setOnItemClickListener((parent, view, position, id) -> {
             Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
+            String tableName = (String) dataList.get(position);
+            Toast.makeText(getApplicationContext(),tableName, Toast.LENGTH_SHORT).show();
+
             Intent newWindow = new Intent(MainActivity.this, TranslationActivity.class);
+            newWindow.putExtra("Table name", tableName);
             startActivity(newWindow);
 
         });
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(getApplicationContext(),"Разрешения получены", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getApplicationContext(),"Текай с городу, тобi....", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     /**
@@ -130,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    private static String dbNAme;
     public void showAlert() {
         AlertDialog.Builder alertDialog =
                 new AlertDialog.Builder(MainActivity.this).setTitle("Новый проект");
@@ -144,18 +181,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,int which) {
 
+                        if (spaceCheck(input.getText().toString())) {
+                            Toast.makeText(getApplicationContext(),
+                                    "Название не должно содержать пробелов", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        dbNAme = input.getText().toString();
+
                         SQLiteDatabase sqDb = db.getWritableDatabase();
-                        ContentValues cv = new ContentValues();
+                        ContentValues cv    = new ContentValues();
                         cv.put("name", input.getText().toString());
 
                         sqDb.insert("Projects", null, cv);
 
                         sqDb.close();
 
-                        createTable(input.getText().toString());
+                        createTable(dbNAme);
 
                         openFileManager();
-                        dataList.add(input.getText().toString());
+                        dataList.add(dbNAme);
                         startList.invalidateViews();
 
                         Toast.makeText(getApplicationContext(),"Проект создан", Toast.LENGTH_SHORT).show();
@@ -172,6 +217,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         alertDialog.show();
     }
 
+    private boolean spaceCheck(String string) {
+
+        if (string.contains(" ")) return true;
+
+        return false;
+    }
+
     /**
      * Создание таблицы с заданным именем
      * @param tableName имя таблицы
@@ -182,11 +234,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         sqlHelper.execSQL("create table "  + tableName + " ("
                 + "id integer primary key autoincrement,"
-                + "original_text text NOT NULL,"
+                + "original_text text,"
                 + "translate_text text,"
                 + "status integer,"
-                + "text_id integer,"
-                + "FOREIGN KEY(text_id) REFERENCES artist(id)" + ");");
+                + "text_id integer);");
     }
 
 
@@ -199,11 +250,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
         // browser.
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+
 
         // Filter to only show results that can be "opened", such as a
         // file (as opposed to a list of contacts or timezones)
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
         // Filter to show only images, using the image MIME data type.
         // If one wanted to search for ogg vorbis files, the type would be "audio/ogg".
@@ -212,8 +266,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         intent.setType("text/*");
 
         startActivityForResult(intent, READ_REQUEST_CODE);
-        startActivityForResult(intent, RESULT_OK);
 
+    }
+
+    private void parseFile(Uri path, String projectName) throws FileNotFoundException
+    {
+        InputStream inputStream = getContentResolver().openInputStream(path);
+        Scanner sc = new Scanner(inputStream);
+
+        SQLiteDatabase sqDb = db.getWritableDatabase();
+        while (sc.hasNextLine()) {
+            ContentValues cv = new ContentValues();
+            String tmp = sc.nextLine();
+            if (!tmp.equals(""))
+            {
+                cv.put("original_text", tmp);
+                cv.put("status", 0);
+                sqDb.insert(projectName, null, cv);
+            }
+        }
+        sqDb.close();
     }
 
 
@@ -221,29 +293,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onActivityResult(int requestCode, int resultCode,
                                  Intent resultData) {
 
-        // The ACTION_OPEN_DOCUMENT intent was sent with the request code
-        // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
-        // response to some other intent, and the code below shouldn't run at all.
-
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            // The document selected by the user won't be returned in the intent.
-            // Instead, a URI to that document will be contained in the return intent
-            // provided to this method as a parameter.
-            // Pull that URI using resultData.getData().
-            String path = null;
-            if (resultData != null) {
-                path = resultData.getData().getPath();
 
-                /*
-                Здесь должен быть вызван код парсера.
-                Парсер должен открыть по указанному пути
-                файл и, разбив его по предложениям, занести в бд.
-                 */
+            if (resultData != null) {
+                Uri uri = resultData.getData();
+                try {
+                    parseFile(uri, dbNAme);
+                } catch (IOException e) {
+                    Toast.makeText(getApplicationContext(),
+                            "Ты как всегда облажался", Toast.LENGTH_SHORT).show();
+                }
+                //path = path.substring(path.indexOf(":") + 1);
 
             }
+
         }
     }
-
 
     @Override
     public void onClick(View view) {
@@ -255,6 +320,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
         }
-
     }
 }
