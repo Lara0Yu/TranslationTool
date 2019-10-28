@@ -13,44 +13,89 @@
         android:orientation="vertical"
         android:padding="20dp"
         android:paddingTop="20dp"
-        android:paddingBottom="20dp">
+        android:paddingBottom="20dp"
+        tools:layout_editor_absoluteX="-178dp"
+        tools:layout_editor_absoluteY="224dp">
+
+        <RelativeLayout
+            android:id="@+id/topButtonsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp">]
+
+            <Button
+                android:id="@+id/next"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="-4dp"
+                android:text="Next" />
+
+            <TextView
+                android:id="@+id/pageCount"
+                android:layout_width="176dp"
+                android:layout_height="46dp"
+                android:layout_centerInParent="true"
+                android:padding="10dp"
+                android:textAlignment="center"
+                android:fontFamily="sans-serif-black"
+                android:textSize="18dp"
+                android:text="10/120"
+                ></TextView>
+
+            <Button
+                android:id="@+id/prev"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Prev" />
+
+        </RelativeLayout>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="200dp"
+            app:cardBackgroundColor="#AAAAAA"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            >
+
 
             <TextView
                 android:id="@+id/textView3"
+                android:padding="20dp"
+                android:fontFamily="helvetica"
+                android:textSize="20dp"
+
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="TextView" />
+                android:layout_height="700dp"
+                android:textIsSelectable="false"
+                android:text="This is an example text to show how
+this shit will look like when there is at least a single sentence.This is an example text to show how
+this shit will look like when there is at least a single sentence." />
 
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="200dp">
+            android:layout_height="200dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            app:cardBackgroundColor="#CCCCCC">
 
             <EditText
                 android:id="@+id/editText2"
+                android:padding="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:ems="10"
-                android:inputType="textPersonName"
-                android:text="Name" />
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines ="10"
+                android:scrollHorizontally="false"
+                android:text="Here one will be typing the translation,
+here's a pretty long sentence, long enouugh.Here one will be typing the translation,
+here's a pretty long sentence, long enouugh.Here one will be typing the translation,
+here's a pretty long sentence, long enouugh." />
         </androidx.cardview.widget.CardView>
 
-        <Button
-            android:id="@+id/next"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Next" />
-
-        <Button
-            android:id="@+id/prev"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Prev" />
 
         <Button
             android:id="@+id/save"
