@@ -2,6 +2,7 @@ package com.example.translationtools;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -27,6 +28,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     private TextView outputField;
 
     private  static String TABLE_NAME;
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,15 +38,26 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         save = (Button) findViewById(R.id.save);
         save.setOnClickListener(this);
 
-        next = (Button) findViewById(R.id.next);
-        next.setOnClickListener(this);
-
-        prev = (Button) findViewById(R.id.prev);
-        prev.setOnClickListener(this);
-
-
         inputField = findViewById(R.id.inputField);
         outputField = findViewById(R.id.outputField);
+
+        inputField.setOnTouchListener(new OnSwipeTouchListener(this) {
+            @Override
+            public void onSwipeLeft() {
+                super.onSwipeLeft();
+                next();
+
+            }
+
+
+            @Override
+            public void onSwipeRight() {
+               super.onSwipeRight();
+               prev();
+
+            // Put your logic here for text visibility and for timer like progress bar for 5 second and setText
+        }
+    });
 
         TABLE_NAME = getIntent().getStringExtra("Table name");
         setData(TABLE_NAME);
@@ -78,6 +91,10 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         if (cursor.moveToNext())
         {
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+
+            if (!cursor.isNull(cursor.getColumnIndex("translate_text"))) {
+                outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
+            }
         } else {
             /**
              * do smthg
@@ -88,11 +105,8 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     public void prev() {
 
         if (cursor.moveToPrevious()) {
-            outputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+            inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
         }
-        String s = "hello word";
-        s.charAt(0);
-
     }
 
     public void save() {
@@ -108,15 +122,6 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
                 save();
                 Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.prev:
-                Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.next:
-                next();
-
-                Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
-                break;
-
         }
     }
 }

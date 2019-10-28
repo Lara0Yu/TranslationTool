@@ -2,15 +2,11 @@ package com.example.translationtools;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,40 +15,27 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 
-import android.provider.MediaStore;
-import android.text.InputType;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -94,6 +77,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(newWindow);
 
         });
+
+        startList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                                           int pos, long id) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Удаление ");
+                builder.setMessage("Вы действительно хотите удалить этот проект?");
+
+                builder.setPositiveButton("Удалить", (dialog, which) -> {
+                    Toast.makeText(getApplicationContext(),
+                            "Проект удален.", Toast.LENGTH_SHORT).show();
+                    SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+
+                    String name = (String) dataList.get(pos);
+                    System.out.println(name);
+                    sqLiteDatabase.delete("Projects", "name = \"" + name + "\"", null);
+                    sqLiteDatabase.delete(name, null, null);
+
+                    //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + name + '"');
+
+                    dataList.remove(pos);
+                    startList.invalidateViews();
+
+                });
+                builder.setNegativeButton("Отмена", (dialog, which) -> {
+
+
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                showDeleteWindow();
+
+                return true;
+            }
+        });
+    }
+
+    public void showDeleteWindow() {
+
+
     }
 
     @Override
@@ -178,34 +205,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Setting Positive "Yes" Button
         alertDialog.setPositiveButton("Создать",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,int which) {
+                (dialog, which) -> {
 
-                        if (spaceCheck(input.getText().toString())) {
-                            Toast.makeText(getApplicationContext(),
-                                    "Название не должно содержать пробелов", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        dbNAme = input.getText().toString();
-
-                        SQLiteDatabase sqDb = db.getWritableDatabase();
-                        ContentValues cv    = new ContentValues();
-                        cv.put("name", input.getText().toString());
-
-                        sqDb.insert("Projects", null, cv);
-
-                        sqDb.close();
-
-                        createTable(dbNAme);
-
-                        openFileManager();
-                        dataList.add(dbNAme);
-                        startList.invalidateViews();
-
-                        Toast.makeText(getApplicationContext(),"Проект создан", Toast.LENGTH_SHORT).show();
-
+                    if (spaceCheck(input.getText().toString())) {
+                        Toast.makeText(getApplicationContext(),
+                                "Название не должно содержать пробелов", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+
+                    dbNAme = input.getText().toString();
+
+                    SQLiteDatabase sqDb = db.getWritableDatabase();
+                    ContentValues cv    = new ContentValues();
+                    cv.put("name", input.getText().toString());
+
+                    sqDb.insert("Projects", null, cv);
+
+                    sqDb.close();
+
+                    createTable(dbNAme);
+
+                    openFileManager();
+                    dataList.add(dbNAme);
+                    startList.invalidateViews();
+
+                    Toast.makeText(getApplicationContext(),"Проект создан", Toast.LENGTH_SHORT).show();
+
                 });
         // Setting Negative "Cancel" Button
         alertDialog.setNegativeButton("Отмена",
@@ -269,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void parseFile(Uri path, String projectName) throws FileNotFoundException
+    private void parseFile_(Uri path, String projectName) throws FileNotFoundException
     {
         InputStream inputStream = getContentResolver().openInputStream(path);
         Scanner sc = new Scanner(inputStream);
@@ -287,6 +312,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         sqDb.close();
     }
+
+    private void parseFile(Uri path, String projectName) throws FileNotFoundException {
+        InputStream inputStream = getContentResolver().openInputStream(path);
+        Scanner sc = new Scanner(inputStream);
+
+        SQLiteDatabase sqDb = db.getWritableDatabase();
+        String next="";
+        while (sc.hasNextLine()) {
+            ContentValues cv = new ContentValues();
+            String tmp = sc.nextLine();
+            if (sc.hasNextLine()){
+                next = sc.nextLine();
+
+                while ((!next.equals("")) && sc.hasNextLine() && (!Character.isUpperCase(next.charAt(0)))) {
+                    tmp = tmp + next;
+                    next = sc.nextLine();
+                }
+            }
+            if (!tmp.equals("")) {
+                cv.put("original_text", tmp);
+                cv.put("status", 0);
+                sqDb.insert(projectName, null, cv);
+            }
+
+        }
+        ContentValues cv = new ContentValues();
+        if (!next.equals("")) {
+            cv.put("original_text", next);
+            cv.put("status", 0);
+            sqDb.insert(projectName, null, cv);
+        }
+        sqDb.close();
+    }
+
 
 
     @Override
