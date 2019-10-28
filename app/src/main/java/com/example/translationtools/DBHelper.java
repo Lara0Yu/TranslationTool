@@ -18,13 +18,6 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table Projects ("
                 + "id integer primary key autoincrement,"
                 + "name text" + ");");
-        db.execSQL("create table Sentences ("
-                + "id integer primary key autoincrement,"
-                + "original_text text NOT NULL,"
-                + "translate_text text,"
-                + "status integer,"
-                + "text_id integer,"
-                + "FOREIGN KEY(text_id) REFERENCES artist(id)" + ");");
     }
 
     @Override

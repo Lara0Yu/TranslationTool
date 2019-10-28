@@ -2,6 +2,9 @@ package com.example.translationtools;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -17,8 +20,11 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     private Button save;
     private Button next;
     private Button prev;
+//    private int currentId;
+    Cursor cursor;
     private DBHelper db;
     private TextView inputField;
+    private TextView outputField;
     List list;
 
     @Override
@@ -36,35 +42,57 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         prev = (Button) findViewById(R.id.prev);
         prev.setOnClickListener(this);
 
-        list = new ArrayList<String>();
-        list.add("Call me Ishmael.");
-        list.add("Some years ago—never mind how long precisely— having little or no money in my purse, and nothing particular to interest me on shore.");
-        list.add("I thought I would sail about a little and see the watery part of the world.");
-        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-        list.add("Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul;");
-        list.add("Whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet;");
-        list.add("And especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle.");
-//        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-//        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-//        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-//        list.add("It is a way I have of driving offd regulating the circulation.");
-////        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-////        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-////        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-////        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-////        list.add("It is a way I have of driving off the spleen and regulating the circulation."); the spleen and regulating the circulation.");
-//        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
-//        list.add("It is a way I have of driving off the spleen and regulating the circulation.");
 
         inputField = findViewById(R.id.inputField);
+        outputField = findViewById(R.id.outputField);
+
+        String paramValue = getIntent().getStringExtra("Table name");
+        setData(paramValue);
+    }
+
+    public void setData(String tableName) {
+        SQLiteDatabase sqlDb = db.getWritableDatabase();
+        String[] tableColumns = new String[] {"original_text"};
+        String whereClause = "status = ?";
+        String[] whereArgs = new String[] {
+                "0"
+        };
+
+        cursor =
+                sqlDb.query(tableName,  tableColumns, whereClause,
+                        whereArgs, null, null, null);
+
+        if (cursor.moveToFirst()) {
+            inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+
+            outputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+//            currentId = cursor.getInt(cursor.getColumnIndex("id"));
+        }
+        // Здесь устанавливаем в поле текст, который вытащим из бд
 
     }
 
     public void next() {
 
+    // Хотим идти на следующее предложение
+        // Сохраняем то что есть в поле транслайтед в БД если не была нажата кнопка сейв
+
+        if (cursor.moveToNext())
+        {
+            inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+        } else {
+            /**
+             * do smthg
+             */
+        }
     }
 
     public void prev() {
+
+        if (cursor.moveToPrevious()) {
+            inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+            o
+        }
 
     }
 
@@ -82,16 +110,11 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
                 Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.prev:
-                if (currentIndex == 0) break;
-                currentIndex--;
-                str = (String) list.get(currentIndex);
-                inputField.setText(str);
                 Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.next:
-                str = (String) list.get(currentIndex);
-                inputField.setText(str);
-                currentIndex++;
+                next();
+
                 Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
 

@@ -64,8 +64,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setDataListView();
 
         startList.setOnItemClickListener((parent, view, position, id) -> {
-            Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
+
+            String tableName = (String) dataList.get(position);
+            Toast.makeText(getApplicationContext(),tableName, Toast.LENGTH_SHORT).show();
+
             Intent newWindow = new Intent(MainActivity.this, TranslationActivity.class);
+            newWindow.putExtra("Table name", tableName);
             startActivity(newWindow);
 
         });
