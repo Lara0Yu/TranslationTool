@@ -316,34 +316,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Scanner sc = new Scanner(inputStream);
 
         SQLiteDatabase sqDb = db.getWritableDatabase();
-        String next = "";
-        while (sc.hasNextLine()) {
-            ContentValues cv = new ContentValues();
-            String tmp = sc.nextLine();
+        String tmp = "";
+        String next;
+
+        while (sc.hasNextLine()){
+            while (tmp.equals("") && sc.hasNextLine()){
+                tmp = sc.nextLine();
+            }
             if (sc.hasNextLine()){
                 next = sc.nextLine();
-                if (!sc.hasNextLine())
-                {
-                    tmp = tmp + next;
-                    next = "";
+                if (!next.equals("")) {
+                    if (!Character.isUpperCase(next.charAt(0))) {
+                        tmp += next;
+                    }
+                    else {
+//                        System.out.println(tmp);
+//                        System.out.println("!!!!!!!");
+                        ContentValues cv = new ContentValues();
+                        cv.put("original_text", tmp);
+                        cv.put("status", 0);
+                        sqDb.insert(projectName, null, cv);
+                        tmp = next;
+                    }
                 }
-                while ((!next.equals("")) && sc.hasNextLine() && (!Character.isUpperCase(next.charAt(0)))) {
-                    tmp = tmp + next;
-                    next = sc.nextLine();
+                else{
+//                    System.out.println(tmp);
+//                    System.out.println("!!!!!!!!!!!!!");
+                    ContentValues cv = new ContentValues();
+                    cv.put("original_text", tmp);
+                    cv.put("status", 0);
+                    sqDb.insert(projectName, null, cv);
+                    tmp = "";
                 }
             }
-            if (!tmp.equals("")) {
-                cv.put("original_text", tmp);
-                cv.put("status", 0);
-                sqDb.insert(projectName, null, cv);
-            }
-
-        }
-        ContentValues cv = new ContentValues();
-        if (!next.equals("")) {
-            cv.put("original_text", next);
-            cv.put("status", 0);
-            sqDb.insert(projectName, null, cv);
         }
         sqDb.close();
     }
