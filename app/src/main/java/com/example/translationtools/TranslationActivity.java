@@ -25,6 +25,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     private DBHelper db;
     private TextView inputField;
     private TextView outputField;
+    private TextView pageNumField;
     List list;
 
     private  static String TABLE_NAME;
@@ -46,6 +47,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         inputField = findViewById(R.id.inputField);
         outputField = findViewById(R.id.outputField);
+        pageNumField = findViewById(R.id.pageNum);
 
         TABLE_NAME = getIntent().getStringExtra("Table name");
         setData(TABLE_NAME);
@@ -66,7 +68,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         if (cursor.moveToFirst()) {
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
 
-            outputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+            outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
 //            currentId = cursor.getInt(cursor.getColumnIndex("id"));
         }
         // Здесь устанавливаем в поле текст, который вытащим из бд
@@ -81,6 +83,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         if (cursor.moveToNext())
         {
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+            pageNumField.setText(cursor.getString(cursor.getColumnIndex("id")));
             if (!cursor.isNull(cursor.getColumnIndex("translate_text")))
             {
                 outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
@@ -115,6 +118,8 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
             cursor.moveToPosition(position);
 
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+            pageNumField.setText(cursor.getString(cursor.getColumnIndex("id")));
+
             if (!cursor.isNull(cursor.getColumnIndex("translate_text")))
             {
                 outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
@@ -153,6 +158,8 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         sqlDb.close();
 
     }
+
+
 
     int currentIndex = 1;
     String str;

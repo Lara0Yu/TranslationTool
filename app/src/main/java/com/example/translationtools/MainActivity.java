@@ -189,8 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 + "original_text text NOT NULL,"
                 + "translate_text text,"
                 + "status integer,"
-                + "text_id integer,"
-                + "FOREIGN KEY(text_id) REFERENCES artist(id)" + ");");
+                + "text_id integer);");
     }
 
 
