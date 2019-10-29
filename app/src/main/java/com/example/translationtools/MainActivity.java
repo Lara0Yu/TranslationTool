@@ -294,8 +294,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void parseFile_(Uri path, String projectName) throws FileNotFoundException
-    {
+    private void parseFile_(Uri path, String projectName) throws FileNotFoundException {
         InputStream inputStream = getContentResolver().openInputStream(path);
         Scanner sc = new Scanner(inputStream);
 
@@ -303,8 +302,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         while (sc.hasNextLine()) {
             ContentValues cv = new ContentValues();
             String tmp = sc.nextLine();
-            if (!tmp.equals(""))
-            {
+            if (!tmp.equals("")) {
                 cv.put("original_text", tmp);
                 cv.put("status", 0);
                 sqDb.insert(projectName, null, cv);
@@ -318,13 +316,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Scanner sc = new Scanner(inputStream);
 
         SQLiteDatabase sqDb = db.getWritableDatabase();
-        String next="";
+        String next = "";
         while (sc.hasNextLine()) {
             ContentValues cv = new ContentValues();
             String tmp = sc.nextLine();
             if (sc.hasNextLine()){
                 next = sc.nextLine();
-
+                if (!sc.hasNextLine())
+                {
+                    tmp = tmp + next;
+                    next = "";
+                }
                 while ((!next.equals("")) && sc.hasNextLine() && (!Character.isUpperCase(next.charAt(0)))) {
                     tmp = tmp + next;
                     next = sc.nextLine();
