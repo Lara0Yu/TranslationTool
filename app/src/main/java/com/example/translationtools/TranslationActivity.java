@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,12 +21,13 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     private Button save;
     private Button next;
     private Button prev;
-//    private int currentId;
+    //    private int currentId;
     Cursor cursor;
     private DBHelper db;
     private TextView inputField;
     private TextView outputField;
     private TextView pageNumField;
+    private TextView jumpToPage;
     List list;
 
     private  static String TABLE_NAME;
@@ -44,10 +46,28 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         prev = (Button) findViewById(R.id.prev);
         prev.setOnClickListener(this);
 
+//        jumpToPage = findViewById(R.id.pageNum);
+
 
         inputField = findViewById(R.id.inputField);
         outputField = findViewById(R.id.outputField);
         pageNumField = findViewById(R.id.pageNum);
+
+
+        pageNumField.setOnKeyListener(new View.OnKeyListener() {
+
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.KEYCODE_ENTER)
+                {
+                    jumpToPage();
+                    return true;
+                }
+
+                return false;
+            }
+
+        });
 
         TABLE_NAME = getIntent().getStringExtra("Table name");
         setData(TABLE_NAME);
@@ -67,7 +87,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         if (cursor.moveToFirst()) {
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
-
+            pageNumField.setText(cursor.getString(cursor.getColumnIndex("id")));
             outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
 //            currentId = cursor.getInt(cursor.getColumnIndex("id"));
         }
@@ -77,7 +97,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
     public void next() {
 
-    // Хотим идти на следующее предложение
+        // Хотим идти на следующее предложение
         // Сохраняем то что есть в поле транслайтед в БД если не была нажата кнопка сейв
 
         if (cursor.moveToNext())
@@ -144,12 +164,12 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         if (!outputField.getText().toString().isEmpty())
         {
-        cv.put("translate_text", outputField.getText().toString());
+            cv.put("translate_text", outputField.getText().toString());
 
-        if (update)
-        {
-            cv.put("status", "1");
-        }
+            if (update)
+            {
+                cv.put("status", "1");
+            }
             if ((currentStatus == 0 && !update) || update) {
                 int updCount = sqlDb.update(TABLE_NAME, cv, "id = ?",
                         new String[]{currentId});
@@ -183,4 +203,11 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         }
     }
+
+
+    public void jumpToPage()
+    {
+        Toast.makeText(getApplicationContext(),"ffffff", Toast.LENGTH_SHORT).show();
+    }
 }
+
