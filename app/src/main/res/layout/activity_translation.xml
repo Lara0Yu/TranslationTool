@@ -76,8 +76,17 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="60dp"
             android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/numbPage"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="number"
+                android:hint="1/43"/>
 
             <Button
                 android:id="@+id/prev"
@@ -91,8 +100,8 @@
                 android:id="@+id/next"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0px"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Next" />
 
             <Button
@@ -100,9 +109,9 @@
 
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0px"
-                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Сохранить" />
+                android:layout_weight="1"
+                android:text="Save" />
         </LinearLayout>
 
     </LinearLayout>

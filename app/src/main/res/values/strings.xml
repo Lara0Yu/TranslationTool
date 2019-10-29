@@ -9,4 +9,5 @@
     <string name="translated">Here you will enter a translation text.</string>
     <string name="projectName">War and Peace</string>
     <string name="projectPercentage">20%</string>
+    <string name="title_activity_translation_pro">TranslationActivityPro</string>
 </resources>
