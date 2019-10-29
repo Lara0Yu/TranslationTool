@@ -50,7 +50,21 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         TABLE_NAME = getIntent().getStringExtra("Table name");
         setData(TABLE_NAME);
+        m_setData(TABLE_NAME);
     }
+
+
+    public void m_setData(String tableName) {
+        SQLiteDatabase sqlDb = db.getWritableDatabase();
+        Cursor tmp_cur = sqlDb.rawQuery("SELECT id, original_text, translate_text, status FROM "
+                + TABLE_NAME +
+                " where satus=0;", null);
+
+        Toast.makeText(getApplicationContext(), tmp_cur.getString(tmp_cur.getColumnIndex("original_text")), Toast.LENGTH_SHORT).show();
+
+        sqlDb.close();
+    }
+
 
     public void setData(String tableName) {
         SQLiteDatabase sqlDb = db.getWritableDatabase();
