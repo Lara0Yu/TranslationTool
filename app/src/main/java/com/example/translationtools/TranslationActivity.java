@@ -27,6 +27,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     private TextView outputField;
     List list;
 
+    private  static String TABLE_NAME;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,8 +47,8 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
         inputField = findViewById(R.id.inputField);
         outputField = findViewById(R.id.outputField);
 
-        String paramValue = getIntent().getStringExtra("Table name");
-        setData(paramValue);
+        TABLE_NAME = getIntent().getStringExtra("Table name");
+        setData(TABLE_NAME);
     }
 
     public void setData(String tableName) {
