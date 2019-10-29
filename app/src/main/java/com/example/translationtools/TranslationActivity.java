@@ -22,7 +22,9 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     private Button prev;
 //    Cursor cursor;
     private DBHelper db;
+
     private String currentParagraphId;
+    private String paragraphCount;
     private TextView inputField;
     private TextView outputField;
     private EditText pageNumField;
@@ -51,9 +53,21 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         TABLE_NAME = getIntent().getStringExtra("Table name");
         setData(TABLE_NAME);
+
+        getParagraphCount();
+
     }
 
+    public void getParagraphCount() {
+        SQLiteDatabase sqlDb = db.getWritableDatabase();
 
+        Cursor crsr  = sqlDb.rawQuery("SELECT count(*) FROM " + TABLE_NAME + ";", null);
+        if (crsr.moveToFirst()) {
+            paragraphCount = crsr.getString(0);
+        }
+        sqlDb.close();
+        crsr.close();
+    }
 
 //    public void setData(String tableName) {
 //        SQLiteDatabase sqlDb = db.getWritableDatabase();
@@ -119,6 +133,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
             }
 
         }
+
         crsr.close();
         sqlDb.close();
     }
