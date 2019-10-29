@@ -330,8 +330,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         tmp += next;
                     }
                     else {
-//                        System.out.println(tmp);
-//                        System.out.println("!!!!!!!");
                         ContentValues cv = new ContentValues();
                         cv.put("original_text", tmp);
                         cv.put("status", 0);
