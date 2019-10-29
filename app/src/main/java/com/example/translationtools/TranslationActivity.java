@@ -6,15 +6,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class TranslationActivity extends AppCompatActivity implements View.OnClickListener {
@@ -23,14 +20,12 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     private Button save;
     private Button next;
     private Button prev;
-    //    private int currentId;
     Cursor cursor;
     private DBHelper db;
     private TextView inputField;
     private TextView outputField;
     private EditText pageNumField;
     private TextView jumpToPage;
-    List list;
 
     private  static String TABLE_NAME;
     @Override
@@ -75,17 +70,11 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
             outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
 
         }
-        // Здесь устанавливаем в поле текст, который вытащим из бд
-
     }
 
     public void next() {
 
-        // Хотим идти на следующее предложение
-        // Сохраняем то что есть в поле транслайтед в БД если не была нажата кнопка сейв
-
-        if (cursor.moveToNext())
-        {
+        if (cursor.moveToNext()) {
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
             if (!cursor.isNull(cursor.getColumnIndex("translate_text")))
             {

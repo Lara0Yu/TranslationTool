@@ -76,28 +76,31 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="100dp"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/prev"
                 style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
+                android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Предыдущий" />
+                android:text="Prev" />
 
             <Button
                 android:id="@+id/next"
                 style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
+                android:layout_width="0px"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Следующий" />
+                android:text="Next" />
 
             <Button
                 android:id="@+id/save"
+
                 style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
+                android:layout_width="0px"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="Сохранить" />
         </LinearLayout>
