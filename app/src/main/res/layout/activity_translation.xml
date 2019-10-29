@@ -70,7 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textIsSelectable="false"
-                android:text="Call me Ismahel." />
+                android:text="Original text." />
 
         </androidx.cardview.widget.CardView>
 

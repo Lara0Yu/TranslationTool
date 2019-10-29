@@ -98,21 +98,21 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
     public void prev() {
 
         if (cursor.moveToPrevious()) {
-//            String currentId = cursor.getString(cursor.getColumnIndex("id"));
-//
-//            SQLiteDatabase sqlDb = db.getWritableDatabase();
-////            ContentValues cv = new ContentValues();
-//
-//            String[] tableColumns = new String[] {"original_text", "id", "status", "translate_text"};
-//            String whereClause = "id = ?";
-//            String[] whereArgs = new String[] {
-//                     currentId
-//            };
-//
-//            Cursor prevCursor =
-//                    sqlDb.query(TABLE_NAME,  tableColumns, whereClause,
-//                            whereArgs, null, null, null);
 
+            int position = cursor.getPosition();
+
+            SQLiteDatabase sqlDb = db.getWritableDatabase();
+            String[] tableColumns = new String[] {"original_text", "id", "status", "translate_text"};
+            String whereClause = "status = ?";
+            String[] whereArgs = new String[] {
+                    "0"
+            };
+
+            cursor =
+                    sqlDb.query(TABLE_NAME,  tableColumns, whereClause,
+                            whereArgs, null, null, null);
+
+            cursor.moveToPosition(position);
 
             inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
             if (!cursor.isNull(cursor.getColumnIndex("translate_text")))
@@ -161,12 +161,12 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         switch (view.getId()) {
             case R.id.save:
-//                save(true);
+                save(true);
                 Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.prev:
                 prev();
-                Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.next:
                 save(false);
