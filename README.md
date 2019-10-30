@@ -2,6 +2,7 @@
 
 ## Загрузить apk
 Android version reqs.: Android Nougat 7.0.0 <
+
 Здесь должна быть ссылка на бинарник.
 
 ## Инструкция для тестирования в эмуляторе Android Studio
