@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         crsr.close();
         sqlDb.close();
         System.out.println(root2.toString() + projectName + ".txt");
+        Toast.makeText(getApplicationContext(),root2.toString() + "/" + projectName + ".txt", Toast.LENGTH_SHORT).show();
         return root2.toString() + projectName + ".txt";
     }
 
