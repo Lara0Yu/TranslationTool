@@ -50,12 +50,12 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
         inputField = findViewById(R.id.inputField);
         outputField = findViewById(R.id.outputField);
-
+        numbPage = findViewById(R.id.numbPage);
 
         TABLE_NAME = getIntent().getStringExtra("Table name");
         setData(TABLE_NAME);
 
-        numbPage = findViewById(R.id.numbPage);
+
         numbPage.setOnKeyListener((v, keyCode, event) -> {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                     (keyCode == KeyEvent.KEYCODE_ENTER)) {
@@ -78,30 +78,42 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
     public void setCurrentProgress() {
 
-        Toast.makeText(getApplicationContext(),currentParagraphId, Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(),paragraphCount, Toast.LENGTH_SHORT).show();
-        numbPage.setHint("hui");
+//        Toast.makeText(getApplicationContext(),currentParagraphId, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(),paragraphCount, Toast.LENGTH_SHORT).show();
+        String s = currentParagraphId + "/" + paragraphCount;
+        numbPage.setHint(s);
     }
 
     public void setData(String tableName) {
         SQLiteDatabase sqlDb = db.getWritableDatabase();
-        String[] tableColumns = new String[] {"original_text", "id", "status", "translate_text"};
-        String whereClause = "status = ?";
-        String[] whereArgs = new String[] {
-                "0"
-        };
+//        String[] tableColumns = new String[] {"original_text", "id", "status", "translate_text"};
+//        String whereClause = "status = ?";
+//        String[] whereArgs = new String[] {
+//                "0"
+//        };
+//
+//        cursor =
+//                sqlDb.query(tableName,  tableColumns, whereClause,
+//                        whereArgs, null, null, null);
+//
+//        if (cursor.moveToFirst()) {
+//            inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+//            //pageNumField.setText(cursor.getString(cursor.getColumnIndex("id")));
+//            outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
+//
+//        }
 
-        cursor =
-                sqlDb.query(tableName,  tableColumns, whereClause,
-                        whereArgs, null, null, null);
+        Cursor crsr  = sqlDb.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE status = 0 ORDER BY id asc limit 1;", null);
 
-        if (cursor.moveToFirst()) {
-            inputField.setText(cursor.getString(cursor.getColumnIndex("original_text")));
+        if (crsr.moveToFirst()) {
+            inputField.setText(crsr.getString(crsr.getColumnIndex("original_text")));
             //pageNumField.setText(cursor.getString(cursor.getColumnIndex("id")));
-            outputField.setText(cursor.getString(cursor.getColumnIndex("translate_text")));
+            outputField.setText(crsr.getString(crsr.getColumnIndex("translate_text")));
+            currentParagraphId = crsr.getString(crsr.getColumnIndex("id"));
 
         }
-
+        sqlDb.close();
+        crsr.close();
         getParagraphCount();
         setCurrentProgress();
     }
