@@ -78,50 +78,89 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         });
 
-        startList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+       startList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                                            int pos, long id) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Удаление ");
-                builder.setMessage("Вы действительно хотите удалить этот проект?");
+                builder.setTitle("Выгрузка или удалениие проекта");
+                builder.setMessage("Вы действительно хотите выгрузить этот проект?");
 
-                builder.setPositiveButton("Удалить", (dialog, which) -> {
-                    Toast.makeText(getApplicationContext(),
-                            "Проект удален.", Toast.LENGTH_SHORT).show();
-                    SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-
+                builder.setPositiveButton("Выгрузить", (dialog, which) -> {
                     String name = (String) dataList.get(pos);
-                    System.out.println(name);
-                    sqLiteDatabase.delete("Projects", "name = \"" + name + "\"", null);
-                    sqLiteDatabase.delete(name, null, null);
-
-                    //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + name + '"');
-
-                    dataList.remove(pos);
-                    startList.invalidateViews();
-
+                    try {
+                        saveTranslation(name);
+                    } catch (IOException e) {
+                        System.out.println("oooooops");
+                        e.printStackTrace();
+                    }
                 });
-                builder.setNegativeButton("Отмена", (dialog, which) -> {
-
-
+                builder.setNegativeButton("Удалить проект", (dialog, which) -> {
+                    showDeleteWindow(pos);
                 });
-
                 AlertDialog dialog = builder.create();
                 dialog.show();
-
-                showDeleteWindow();
-
                 return true;
             }
         });
     }
 
-    public void showDeleteWindow() {
+    public void showDeleteWindow(int pos) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Удаление ");
+        builder.setMessage("Вы действительно хотите удалить этот проект?");
 
+        builder.setPositiveButton("Удалить", (dialog, which) -> {
+            Toast.makeText(getApplicationContext(),
+                    "Проект удален.", Toast.LENGTH_SHORT).show();
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
 
+            String name = (String) dataList.get(pos);
+            System.out.println(name);
+            sqLiteDatabase.delete("Projects", "name = \"" + name + "\"", null);
+            sqLiteDatabase.delete(name, null, null);
+
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + name + '"');
+
+            dataList.remove(pos);
+            startList.invalidateViews();
+
+        });
+        builder.setNegativeButton("Отмена", (dialog, which) -> {
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
+
+    private String saveTranslation(String projectName) throws IOException {
+//        System.out.println("!!!!!!!!");
+        File root = getDir("data", 0);
+        File textfile = new File(root, projectName + ".txt");
+        System.out.println(root.toString() + projectName + ".txt");
+        textfile.createNewFile();
+        BufferedWriter out = new BufferedWriter(new FileWriter(textfile));
+        SQLiteDatabase sqlDb = db.getWritableDatabase();
+        Cursor crsr  = sqlDb.rawQuery("SELECT * from " + projectName + " ORDER BY id asc", null);
+        if (crsr.moveToFirst()) {
+            do{
+                String paragraph = crsr.getString(crsr.getColumnIndex("translate_text"));
+                String orig = crsr.getString(crsr.getColumnIndex("original_text"));
+                if (paragraph != null){
+                    out.write(paragraph);
+                }
+                else{
+                    out.write(orig);
+                }
+                out.newLine();
+            }while (crsr.moveToNext());
+        }
+        crsr.close();
+        sqlDb.close();
+        return root.toString() + projectName + ".txt";
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
