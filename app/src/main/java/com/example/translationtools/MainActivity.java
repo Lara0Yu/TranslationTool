@@ -18,7 +18,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
+import android.os.Environment;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,9 +35,14 @@ import android.widget.Toast;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -49,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ListAdapter la;
 
     private final static int PERMISSION_REQUEST_CODE =1000;
+    private static final int REQUEST = 112;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +65,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if (Build.VERSION.SDK_INT >= 23) {
+            String[] PERMISSIONS = {android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            if (!hasPermissions(MainActivity.this, PERMISSIONS)) {
+                ActivityCompat.requestPermissions((Activity) MainActivity.this, PERMISSIONS, REQUEST );
+            } else {
+                //do here
+            }
+        } else {
+            //do here
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
         }
+
         db =  new DBHelper(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -94,8 +114,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String name = (String) dataList.get(pos);
                     try {
                         saveTranslation(name);
+                        Toast.makeText(getApplicationContext(),
+                                "Перевод скачен.", Toast.LENGTH_SHORT).show();
                     } catch (IOException e) {
-                        System.out.println("oooooops");
+                        Toast.makeText(getApplicationContext(),
+                                "Произошла ошибка :(", Toast.LENGTH_SHORT).show();
                         e.printStackTrace();
                     }
                 });
@@ -138,12 +161,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private String saveTranslation(String projectName) throws IOException {
-//        System.out.println("!!!!!!!!");
-        File root = getDir("data", 0);
-        File textfile = new File(root, projectName + ".txt");
-        System.out.println(root.toString() + projectName + ".txt");
-        textfile.createNewFile();
-        BufferedWriter out = new BufferedWriter(new FileWriter(textfile));
+
+        File root2 = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File textfile = new File(root2, projectName + ".txt");
+        BufferedWriter out = new BufferedWriter
+                (new OutputStreamWriter(new FileOutputStream(textfile), StandardCharsets.UTF_8));
         SQLiteDatabase sqlDb = db.getWritableDatabase();
         Cursor crsr  = sqlDb.rawQuery("SELECT * from " + projectName + " ORDER BY id asc", null);
         if (crsr.moveToFirst()) {
@@ -159,9 +181,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 out.newLine();
             }while (crsr.moveToNext());
         }
+        out.close();
         crsr.close();
         sqlDb.close();
-        return root.toString() + projectName + ".txt";
+        System.out.println(root2.toString() + projectName + ".txt");
+        return root2.toString() + projectName + ".txt";
     }
 
 
@@ -173,9 +197,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(getApplicationContext(),"Разрешения получены", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getApplicationContext(),"Текай с городу, тобi....", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Ошибка чтения.", Toast.LENGTH_SHORT).show();
             }
         }
+
+        if (requestCode == REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            } else {
+                Toast.makeText(MainActivity.this, "Ошибка записи.", Toast.LENGTH_LONG).show();
+            }
+
+        }
+    }
+
+    private static boolean hasPermissions(MainActivity context, String... permissions) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -380,8 +424,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 else{
-//                    System.out.println(tmp);
-//                    System.out.println("!!!!!!!!!!!!!");
                     ContentValues cv = new ContentValues();
                     cv.put("original_text", tmp);
                     cv.put("status", 0);
