@@ -15,9 +15,9 @@ Android version reqs.: Android Nougat 7.0.0 <
 5. Вам будет предложено импортировать настройки — откажитесь.
 6. Вам будет предложено установить компоненты SDK — установите все (включая Android Virtual Device).
 7. Вам будет предложено выбрать проект — нажмите "Open an existing Android Studio project" и укажите директорию, куда вы клонировали данный репозиторий.
-8. Затем в File - Project Structure - Modules в полях Target Compatability и Source Compatability выбирите "1.8 (Java 8)"
+8. Затем в File - Project Structure - Modules в полях Target Compatability и Source Compatability выберите "1.8 (Java 8)"
 9. Затем нажмите Tools - AVD Manager - Create Virtual Device...
-10. Выбирете Pixel 3 XL, в качестве образа выбирете Nougat 7.0.0 (загрузите его, нажав кнопку Download при необходимости), Finish
+10. Выберете Pixel 3 XL, в качестве образа выбирете Nougat 7.0.0 (загрузите его, нажав кнопку Download при необходимости), Finish
 11. Run - Run app
 12. Должно появиться окно в виде телефонного экрана с открытым приложением "TranslationTools" готовым для тестирования. 
 
