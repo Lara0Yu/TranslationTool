@@ -53,9 +53,8 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
 
         TABLE_NAME = getIntent().getStringExtra("Table name");
-        setData(TABLE_NAME);
 
-        numbPage = findViewById(R.id.numbPage);
+        numbPage = findViewById(R.id.numbP);
         numbPage.setOnKeyListener((v, keyCode, event) -> {
             if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                     (keyCode == KeyEvent.KEYCODE_ENTER)) {
@@ -66,6 +65,8 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
                     Toast.makeText(getApplicationContext(),"Такого абзаца не существует!", Toast.LENGTH_SHORT).show();
                 } else {
                     jumpToPage(currentId);
+                    setCurrentProgress();
+                    numbPage.setText("");
                 }
 
 
@@ -74,13 +75,14 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
             }
             return false;
         });
+
+        setData(TABLE_NAME);
     }
 
     public void setCurrentProgress() {
 
-        Toast.makeText(getApplicationContext(),currentParagraphId, Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(),paragraphCount, Toast.LENGTH_SHORT).show();
-        numbPage.setHint("hui");
+        String str = currentParagraphId + "/" + paragraphCount;
+        numbPage.setHint(str);
     }
 
     public void setData(String tableName) {
@@ -130,6 +132,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
             inputField.setText(originalText);
             outputField.setText(translateText);
+            setCurrentProgress();
         } else {
             crsr  = sqlDb.rawQuery("SELECT * FROM " + TABLE_NAME + " WHERE status = 0 ORDER BY id asc limit 1;", null);
             if (crsr.moveToFirst()){
@@ -140,6 +143,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
                 inputField.setText(originalText);
                 outputField.setText(translateText);
+                setCurrentProgress();
                 Toast.makeText(getApplicationContext(),"Начинаем с начала", Toast.LENGTH_SHORT).show();
             } else{
                 Toast.makeText(getApplicationContext(),"ВЫ ВСЁ ПЕРЕВЕЛИ", Toast.LENGTH_SHORT).show();
@@ -162,6 +166,7 @@ public class TranslationActivity extends AppCompatActivity implements View.OnCli
 
             inputField.setText(originalText);
             outputField.setText(translateText);
+            setCurrentProgress();
         } else {
             Toast.makeText(getApplicationContext(),"Everything is translated up to this point.", Toast.LENGTH_SHORT).show();
         }
