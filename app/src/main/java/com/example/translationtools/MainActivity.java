@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.Environment;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -294,22 +295,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void parseFile_(Uri path, String projectName) throws FileNotFoundException {
-        InputStream inputStream = getContentResolver().openInputStream(path);
-        Scanner sc = new Scanner(inputStream);
-
-        SQLiteDatabase sqDb = db.getWritableDatabase();
-        while (sc.hasNextLine()) {
-            ContentValues cv = new ContentValues();
-            String tmp = sc.nextLine();
-            if (!tmp.equals("")) {
-                cv.put("original_text", tmp);
-                cv.put("status", 0);
-                sqDb.insert(projectName, null, cv);
-            }
-        }
-        sqDb.close();
+    public void openFolder()
+    {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
+                + "/yourFolder/");
+        intent.setDataAndType(uri, "*/*");
+        startActivity(Intent.createChooser(intent, "Open folder"));
     }
+
+
+    private void saveFile(String projectName){
+        
+    }
+
 
     private void parseFile(Uri path, String projectName) throws FileNotFoundException {
         InputStream inputStream = getContentResolver().openInputStream(path);
@@ -338,8 +337,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 else{
-//                    System.out.println(tmp);
-//                    System.out.println("!!!!!!!!!!!!!");
                     ContentValues cv = new ContentValues();
                     cv.put("original_text", tmp);
                     cv.put("status", 0);
@@ -373,6 +370,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
+
 
     @Override
     public void onClick(View view) {
