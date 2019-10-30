@@ -145,9 +145,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String name = (String) dataList.get(pos);
             System.out.println(name);
             sqLiteDatabase.delete("Projects", "name = \"" + name + "\"", null);
-            sqLiteDatabase.delete(name, null, null);
+            //sqLiteDatabase.delete(name, null, null);
 
-            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + name + '"');
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + name);
 
             dataList.remove(pos);
             startList.invalidateViews();
