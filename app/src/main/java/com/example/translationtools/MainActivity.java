@@ -31,7 +31,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -69,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setDataListView();
 
         startList.setOnItemClickListener((parent, view, position, id) -> {
-            Toast.makeText(getApplicationContext(),"Клик", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"ÐšÐ»Ð¸Ðº", Toast.LENGTH_SHORT).show();
             String tableName = (String) dataList.get(position);
             Toast.makeText(getApplicationContext(),tableName, Toast.LENGTH_SHORT).show();
 
@@ -85,43 +88,54 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                            int pos, long id) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Удаление ");
-                builder.setMessage("Вы действительно хотите удалить этот проект?");
+                builder.setTitle("Ð’Ñ‹Ð³Ñ€ÑƒÐ·ÐºÐ° Ð¸Ð»Ð¸ ÑƒÐ´Ð°Ð»ÐµÐ½Ð¸Ð¸Ðµ Ð¿Ñ€Ð¾ÐµÐºÑ‚Ð°");
+                builder.setMessage("Ð’Ñ‹ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ð¾ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ Ð²Ñ‹Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾Ñ‚ Ð¿Ñ€Ð¾ÐµÐºÑ‚?");
 
-                builder.setPositiveButton("Удалить", (dialog, which) -> {
-                    Toast.makeText(getApplicationContext(),
-                            "Проект удален.", Toast.LENGTH_SHORT).show();
-                    SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
-
+                builder.setPositiveButton("Ð’Ñ‹Ð³Ñ€ÑƒÐ·Ð¸Ñ‚ÑŒ", (dialog, which) -> {
                     String name = (String) dataList.get(pos);
-                    System.out.println(name);
-                    sqLiteDatabase.delete("Projects", "name = \"" + name + "\"", null);
-                    sqLiteDatabase.delete(name, null, null);
-
-                    //sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + name + '"');
-
-                    dataList.remove(pos);
-                    startList.invalidateViews();
-
+                    try {
+                        saveTranslation(name);
+                    } catch (IOException e) {
+                        System.out.println("oooooops");
+                        e.printStackTrace();
+                    }
                 });
-                builder.setNegativeButton("Отмена", (dialog, which) -> {
-
-
+                builder.setNegativeButton("Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ Ð¿Ñ€Ð¾ÐµÐºÑ‚", (dialog, which) -> {
+                    showDeleteWindow(pos);
                 });
-
                 AlertDialog dialog = builder.create();
                 dialog.show();
-
-                showDeleteWindow();
-
                 return true;
             }
         });
     }
 
-    public void showDeleteWindow() {
+    public void showDeleteWindow(int pos) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Ð£Ð´Ð°Ð»ÐµÐ½Ð¸Ðµ ");
+        builder.setMessage("Ð’Ñ‹ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ñ‚ÐµÐ»ÑŒÐ½Ð¾ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ ÑÑ‚Ð¾Ñ‚ Ð¿Ñ€Ð¾ÐµÐºÑ‚?");
 
+        builder.setPositiveButton("Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ", (dialog, which) -> {
+            Toast.makeText(getApplicationContext(),
+                    "ÐŸÑ€Ð¾ÐµÐºÑ‚ ÑƒÐ´Ð°Ð»ÐµÐ½.", Toast.LENGTH_SHORT).show();
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
 
+            String name = (String) dataList.get(pos);
+            System.out.println(name);
+            sqLiteDatabase.delete("Projects", "name = \"" + name + "\"", null);
+            sqLiteDatabase.delete(name, null, null);
+
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + name + '"');
+
+            dataList.remove(pos);
+            startList.invalidateViews();
+
+        });
+        builder.setNegativeButton("ÐžÑ‚Ð¼ÐµÐ½Ð°", (dialog, which) -> {
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override
@@ -130,15 +144,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(getApplicationContext(),"Разрешения получены", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Ð Ð°Ð·Ñ€ÐµÑˆÐµÐ½Ð¸Ñ Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ñ‹", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getApplicationContext(),"Текай с городу, тобi....", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Ð¢ÐµÐºÐ°Ð¹ Ñ Ð³Ð¾Ñ€Ð¾Ð´Ñƒ, Ñ‚Ð¾Ð±i....", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     /**
-     *  Заполнение Списка уже созданных проектов из базы данных
+     *  Ð—Ð°Ð¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ðµ Ð¡Ð¿Ð¸ÑÐºÐ° ÑƒÐ¶Ðµ ÑÐ¾Ð·Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð¿Ñ€Ð¾ÐµÐºÑ‚Ð¾Ð² Ð¸Ð· Ð±Ð°Ð·Ñ‹ Ð´Ð°Ð½Ð½Ñ‹Ñ…
      */
     public void setDataListView() {
         ContentValues cv = new ContentValues();
@@ -150,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (c.moveToFirst()) {
 
-            // определяем номера столбцов по имени в выборке
+            // Ð¾Ð¿Ñ€ÐµÐ´ÐµÐ»ÑÐµÐ¼ Ð½Ð¾Ð¼ÐµÑ€Ð° ÑÑ‚Ð¾Ð»Ð±Ñ†Ð¾Ð² Ð¿Ð¾ Ð¸Ð¼ÐµÐ½Ð¸ Ð² Ð²Ñ‹Ð±Ð¾Ñ€ÐºÐµ
             int nameColIndex = c.getColumnIndex("name");
 
             do {
@@ -160,11 +174,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
 
-        //Создаем адаптер (переходник между списком и листвью)
+        //Ð¡Ð¾Ð·Ð´Ð°ÐµÐ¼ Ð°Ð´Ð°Ð¿Ñ‚ÐµÑ€ (Ð¿ÐµÑ€ÐµÑ…Ð¾Ð´Ð½Ð¸Ðº Ð¼ÐµÐ¶Ð´Ñƒ ÑÐ¿Ð¸ÑÐºÐ¾Ð¼ Ð¸ Ð»Ð¸ÑÑ‚Ð²ÑŒÑŽ)
         la = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList);
 
 
-        //Назначаем адаптер листвью
+        //ÐÐ°Ð·Ð½Ð°Ñ‡Ð°ÐµÐ¼ Ð°Ð´Ð°Ð¿Ñ‚ÐµÑ€ Ð»Ð¸ÑÑ‚Ð²ÑŒÑŽ
         startList.setAdapter(la);
 
         c.close();
@@ -197,20 +211,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static String dbNAme;
     public void showAlert() {
         AlertDialog.Builder alertDialog =
-                new AlertDialog.Builder(MainActivity.this).setTitle("Новый проект");
+                new AlertDialog.Builder(MainActivity.this).setTitle("ÐÐ¾Ð²Ñ‹Ð¹ Ð¿Ñ€Ð¾ÐµÐºÑ‚");
 
         // Setting Dialog Message
-        alertDialog.setMessage("Введите название проекта");
+        alertDialog.setMessage("Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð¿Ñ€Ð¾ÐµÐºÑ‚Ð°");
         final EditText input = new EditText(MainActivity.this);
         alertDialog.setView(input);
 
         // Setting Positive "Yes" Button
-        alertDialog.setPositiveButton("Создать",
+        alertDialog.setPositiveButton("Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ",
                 (dialog, which) -> {
 
                     if (spaceCheck(input.getText().toString())) {
                         Toast.makeText(getApplicationContext(),
-                                "Название не должно содержать пробелов", Toast.LENGTH_SHORT).show();
+                                "ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð½Ðµ Ð´Ð¾Ð»Ð¶Ð½Ð¾ ÑÐ¾Ð´ÐµÑ€Ð¶Ð°Ñ‚ÑŒ Ð¿Ñ€Ð¾Ð±ÐµÐ»Ð¾Ð²", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -230,11 +244,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     dataList.add(dbNAme);
                     startList.invalidateViews();
 
-                    Toast.makeText(getApplicationContext(),"Проект создан", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),"ÐŸÑ€Ð¾ÐµÐºÑ‚ ÑÐ¾Ð·Ð´Ð°Ð½", Toast.LENGTH_SHORT).show();
 
                 });
         // Setting Negative "Cancel" Button
-        alertDialog.setNegativeButton("Отмена",
+        alertDialog.setNegativeButton("ÐžÑ‚Ð¼ÐµÐ½Ð°",
                 (dialog, which) -> {
                     // Write your code here to execute after dialog
                     dialog.cancel();
@@ -251,8 +265,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * Создание таблицы с заданным именем
-     * @param tableName имя таблицы
+     * Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹ Ñ Ð·Ð°Ð´Ð°Ð½Ð½Ñ‹Ð¼ Ð¸Ð¼ÐµÐ½ÐµÐ¼
+     * @param tableName Ð¸Ð¼Ñ Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ñ‹
      */
     private void createTable(String tableName) {
 
@@ -269,8 +283,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int READ_REQUEST_CODE = 42;
     /**
-     *  Метод открывает менеджер файлов и позволяет пользователю
-     *  выбрать необходимый файл формата .txt
+     *  ÐœÐµÑ‚Ð¾Ð´ Ð¾Ñ‚ÐºÑ€Ñ‹Ð²Ð°ÐµÑ‚ Ð¼ÐµÐ½ÐµÐ´Ð¶ÐµÑ€ Ñ„Ð°Ð¹Ð»Ð¾Ð² Ð¸ Ð¿Ð¾Ð·Ð²Ð¾Ð»ÑÐµÑ‚ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÑŽ
+     *  Ð²Ñ‹Ð±Ñ€Ð°Ñ‚ÑŒ Ð½ÐµÐ¾Ð±Ñ…Ð¾Ð´Ð¸Ð¼Ñ‹Ð¹ Ñ„Ð°Ð¹Ð» Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð° .txt
      */
     public void openFileManager() {
 
@@ -295,20 +309,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    public void openFolder()
-    {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
-                + "/yourFolder/");
-        intent.setDataAndType(uri, "*/*");
-        startActivity(Intent.createChooser(intent, "Open folder"));
+    private String saveTranslation(String projectName) throws IOException {
+//        System.out.println("!!!!!!!!");
+        File root = getDir("data", 0);
+        File textfile = new File(root, projectName + ".txt");
+        System.out.println(root.toString() + projectName + ".txt");
+        textfile.createNewFile();
+        BufferedWriter out = new BufferedWriter(new FileWriter(textfile));
+        SQLiteDatabase sqlDb = db.getWritableDatabase();
+        Cursor crsr  = sqlDb.rawQuery("SELECT * from " + projectName + " ORDER BY id asc", null);
+        if (crsr.moveToFirst()) {
+            do{
+                String paragraph = crsr.getString(crsr.getColumnIndex("translate_text"));
+                String orig = crsr.getString(crsr.getColumnIndex("original_text"));
+                if (paragraph != null){
+                    out.write(paragraph);
+                }
+                else{
+                    out.write(orig);
+                }
+                out.newLine();
+            }while (crsr.moveToNext());
+        }
+        crsr.close();
+        sqlDb.close();
+        return root.toString() + projectName + ".txt";
     }
 
+    private void parseFile_(Uri path, String projectName) throws FileNotFoundException {
+        InputStream inputStream = getContentResolver().openInputStream(path);
+        Scanner sc = new Scanner(inputStream);
 
-    private void saveFile(String projectName){
-        
+        SQLiteDatabase sqDb = db.getWritableDatabase();
+        while (sc.hasNextLine()) {
+            ContentValues cv = new ContentValues();
+            String tmp = sc.nextLine();
+            if (!tmp.equals("")) {
+                cv.put("original_text", tmp);
+                cv.put("status", 0);
+                sqDb.insert(projectName, null, cv);
+            }
+        }
+        sqDb.close();
     }
-
 
     private void parseFile(Uri path, String projectName) throws FileNotFoundException {
         InputStream inputStream = getContentResolver().openInputStream(path);
@@ -337,6 +380,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 else{
+//                    System.out.println(tmp);
+//                    System.out.println("!!!!!!!!!!!!!");
                     ContentValues cv = new ContentValues();
                     cv.put("original_text", tmp);
                     cv.put("status", 0);
@@ -362,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     parseFile(uri, dbNAme);
                 } catch (IOException e) {
                     Toast.makeText(getApplicationContext(),
-                            "Ты как всегда облажался", Toast.LENGTH_SHORT).show();
+                            "Ð¢Ñ‹ ÐºÐ°Ðº Ð²ÑÐµÐ³Ð´Ð° Ð¾Ð±Ð»Ð°Ð¶Ð°Ð»ÑÑ", Toast.LENGTH_SHORT).show();
                 }
                 //path = path.substring(path.indexOf(":") + 1);
 
@@ -370,7 +415,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }
-
 
     @Override
     public void onClick(View view) {
