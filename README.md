@@ -1,5 +1,23 @@
 # TranslationTool
 
+## Загрузить apk
+Android version reqs.: Android Nougat 7.0.0 <
+Здесь должна быть ссылка на бинарник.
+
+## Инструкция для тестирования в эмуляторе Android Studio
+1. Клонируйте данный репозиторий
+2. Загрузите [Android Studio 3.5.1](https://developer.android.com/studio)
+3. Установите и загрузите все предлагаемые компоненты программы.
+4. При завершении установки запустите Android Studio.
+5. Вам будет предложено импортировать настройки — откажитесь.
+6. Вам будет предложено установить компоненты SDK — установите все (включая Android Virtual Device).
+7. Вам будет предложено выбрать проект — нажмите "Open an existing Android Studio project" и укажите директорию, куда вы клонировали данный репозиторий.
+8. Затем в File - Project Structure - Modules в полях Target Compatability и Source Compatability выбирите "1.8 (Java 8)"
+9. Затем нажмите Tools - AVD Manager - Create Virtual Device...
+10. Выбирете Pixel 3 XL, в качестве образа выбирете Nougat 7.0.0 (загрузите его, нажав кнопку Download при необходимости), Finish
+11. Run - Run app
+12. Должно появиться окно в виде телефонного экрана с открытым приложением "TranslationTools" готовым для тестирования. 
+
 
 ## Bug Tracker
 
